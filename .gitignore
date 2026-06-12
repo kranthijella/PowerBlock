@@ -1,0 +1,22 @@
+# Go build artifacts
+/powerblock
+/bin/
+*.test
+*.out
+
+# Frontend Vite project: deps and its local build output (the build is copied into
+# internal/httpapi/web/dist for embedding, which IS tracked so `go build` works
+# from a clean checkout).
+/web/node_modules/
+/web/dist/
+*.tsbuildinfo
+
+# Local data
+*.db
+*.sqlite
+*.sqlite3
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
