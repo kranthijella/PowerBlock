@@ -26,6 +26,9 @@ Then open http://localhost:8000.
 runs the Go and frontend tests. Building locally needs Go 1.26+ and Node 20+; with
 Docker you need neither.
 
+It's deployed on Fly.io ([live demo](https://powerblock.fly.dev/)); pushes to `master`
+auto-deploy via GitHub Actions.
+
 ## Stack
 
 - **Backend:** Go, standard library. Owns the catalog, pricing, transformer rule,
@@ -37,6 +40,26 @@ Docker you need neither.
 
 The built frontend is embedded into the Go binary with `go:embed`, so the whole app
 ships as one static binary serving the API and the UI on a single port.
+
+The backend is layered: `catalog` (the device source of truth) → `engine` (cost,
+energy, and transformer math) → `layout` (packing), with `store` behind an interface
+for persistence and `httpapi` exposing it all. Dependencies point one way, and all the
+logic lives server-side; the React client just renders what the API returns.
+
+```
+cmd/server/        entrypoint: config, wiring, graceful shutdown
+internal/
+  catalog/         device specs (the source of truth)
+  engine/          cost, energy, transformer math
+  layout/          shelf-packing into ≤100 ft rows
+  store/           Store interface + SQLite implementation
+  httpapi/         JSON API + serves the embedded frontend
+web/src/
+  components/      React UI (configurator, summary, layout, …)
+  services/        typed API client
+  types/           shared domain types
+  utils/           formatters, colors, isometric geometry
+```
 
 ## How it works
 
@@ -59,7 +82,8 @@ netEnergy    = Σ(qty × MWh)  − transformers × 0.5 MWh
 
 Every device is 10 ft deep, so the layout is a shelf-packing problem: fill 10-ft rows
 left to right (widest device first) and wrap to a new row at 100 ft. Land size is the
-bounding box of the result.
+bounding box of the result. The layout has a to-scale 2D plan and an optional isometric
+3D view.
 
 Quick check, 2× MegapackXL + 1× Megapack + 2× PowerPack: 5 batteries means 3
 transformers, which comes out to **$340,000**, **10.5 MWh**, on a 100 × 20 ft footprint.
