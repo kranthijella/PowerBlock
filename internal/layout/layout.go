@@ -1,11 +1,3 @@
-// Package layout arranges devices into a to-scale site plan. Because every device
-// is the same depth (catalog.DepthFT), the site is a stack of equal-height rows
-// and the problem reduces to shelf bin-packing: fill rows left-to-right without
-// exceeding MaxWidthFT, wrapping to a new row when the next block won't fit.
-//
-// This package is purely geometric. It is handed final device counts (batteries
-// plus the already-derived transformers) and knows nothing about pricing, the
-// transformer rule, or energy — that lives in package engine.
 package layout
 
 import "PowerBlock/internal/catalog"
@@ -32,16 +24,8 @@ type Layout struct {
 	AreaSqFt int           `json:"areaSqFt"`
 }
 
-// Pack arranges the given device counts into rows and returns the layout with its
-// bounding-box dimensions.
-//
-// Blocks are emitted in canonical catalog order — batteries widest-first, then the
-// transformer — which packs tightly (first-fit-decreasing) and groups like devices
-// visually. Unknown device names and non-positive counts are ignored. The result's
-// Blocks is always non-nil so it marshals to a JSON array, not null.
 func Pack(counts map[string]int) Layout {
 	blocks := []PlacedBlock{}
-	// rowUsed[i] is the width consumed by row i; rows are catalog.DepthFT tall.
 	var rowUsed []int
 
 	for _, dev := range catalog.All() {
