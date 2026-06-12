@@ -61,11 +61,6 @@ export function SessionBar({ onSave, saving, savedCode, shareUrl, dirty, canSave
       {showSaved && dirty && (
         <p className="session-bar__hint">Unsaved changes — save again to update the link.</p>
       )}
-      {showSaved && !dirty && (
-        <p className="session-bar__hint muted">
-          Open this link anywhere to resume — it survives a browser cache clear.
-        </p>
-      )}
       {error && <p className="session-bar__error">{error}</p>}
     </div>
   );
