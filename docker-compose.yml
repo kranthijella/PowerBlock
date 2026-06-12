@@ -1,0 +1,18 @@
+
+services:
+  powerblock:
+    build: .
+    image: powerblock:latest
+    ports:
+      - "8000:8000"
+    environment:
+      # Override here if you want a different bind address or db path.
+      POWERBLOCK_ADDR: ":8000"
+      POWERBLOCK_DB: "/data/powerblock.db"
+    volumes:
+      # Named volume so saved sessions survive container restarts / rebuilds.
+      - powerblock-data:/data
+    restart: unless-stopped
+
+volumes:
+  powerblock-data:
