@@ -1,5 +1,5 @@
 import { memo } from "react";
-import type { Point, UnitFaces } from "../iso.ts";
+import type { Point, UnitFaces } from "../utils/iso.ts";
 
 // IsoBox draws a single unit as an extruded box: three SVG polygons (left and
 // right side faces, then the top face on top) plus the device's surface markings

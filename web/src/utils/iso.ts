@@ -1,5 +1,5 @@
 
-import type { PlacedBlock } from "./api.ts";
+import type { PlacedBlock } from "../types/index.ts";
 import { deviceStyle } from "./deviceStyle.ts";
 
 // --- tunable projection constants (viewBox units per foot / fixed px height) ---

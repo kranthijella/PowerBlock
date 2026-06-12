@@ -5,10 +5,8 @@ import {
   fetchCatalog,
   loadSession,
   saveSession,
-  type CalculateResult,
-  type Device,
-  type Quantities,
-} from "./api.ts";
+} from "./services/api.ts";
+import type { CalculateResult, Device, Quantities } from "./types/index.ts";
 import { Configurator } from "./components/Configurator.tsx";
 import { Summary } from "./components/Summary.tsx";
 import { SiteLayout } from "./components/SiteLayout.tsx";
@@ -27,6 +25,9 @@ export default function App() {
   const [result, setResult] = useState<CalculateResult | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [calcError, setCalcError] = useState<string | null>(null);
+  // Non-fatal notice when a share code from the URL can't be resumed (e.g. expired or
+  // mistyped). The app still loads normally with an empty configuration.
+  const [sessionNotice, setSessionNotice] = useState<string | null>(null);
 
   // Saved-session tracking: the share code and a snapshot of the quantities at save
   // time, so we can tell the user when their current edits are unsaved.
@@ -40,22 +41,38 @@ export default function App() {
   useEffect(() => {
     const ctrl = new AbortController();
     (async () => {
+      // The catalog is required. If it fails the backend is unreachable, which is the
+      // one case that warrants the full-page error.
+      let devices: Device[];
       try {
-        const code = readShareCode();
-        const [cat, session] = await Promise.all([
-          fetchCatalog(ctrl.signal),
-          code ? loadSession(code, ctrl.signal) : Promise.resolve(null),
-        ]);
-        setDevices(cat.devices);
-        if (session) {
-          setQuantities(session.quantities);
-          setSavedCode(session.code);
-          setSavedSnapshot(JSON.stringify(session.quantities));
-        }
+        const cat = await fetchCatalog(ctrl.signal);
+        devices = cat.devices;
       } catch (err) {
         if (ctrl.signal.aborted) return;
-        const msg = err instanceof ApiError ? err.message : "could not load app data";
-        setLoadError(msg);
+        setLoadError(err instanceof ApiError ? err.message : "could not load app data");
+        return;
+      }
+      setDevices(devices);
+
+      // A saved session is optional. A bad or expired share code should leave the app
+      // fully usable, so surface a dismissible notice instead of crashing the page.
+      const code = readShareCode();
+      if (!code) return;
+      try {
+        const session = await loadSession(code, ctrl.signal);
+        setQuantities(session.quantities);
+        setSavedCode(session.code);
+        setSavedSnapshot(JSON.stringify(session.quantities));
+      } catch (err) {
+        if (ctrl.signal.aborted) return;
+        const notFound = err instanceof ApiError && err.status === 404;
+        setSessionNotice(
+          notFound
+            ? `No saved configuration found for code “${code}”. Starting fresh.`
+            : "Couldn’t load that saved configuration. Starting fresh.",
+        );
+        // Drop the bad code from the URL so a refresh starts clean.
+        window.history.replaceState(null, "", window.location.pathname);
       }
     })();
     return () => ctrl.abort();
@@ -146,6 +163,19 @@ export default function App() {
 
         {/* Inputs + save/resume on the right */}
         <section className="app__panel app__panel--config">
+          {sessionNotice && (
+            <div className="notice" role="status">
+              <span>{sessionNotice}</span>
+              <button
+                type="button"
+                className="notice__close"
+                aria-label="Dismiss"
+                onClick={() => setSessionNotice(null)}
+              >
+                ×
+              </button>
+            </div>
+          )}
           <Configurator
             batteries={batteries}
             quantities={quantities}

@@ -1,5 +1,5 @@
-import type { Device, Quantities } from "../api.ts";
-import { formatMwh, formatUsd } from "../format.ts";
+import type { Device, Quantities } from "../types/index.ts";
+import { formatMwh, formatUsd } from "../utils/format.ts";
 
 interface Props {
   batteries: Device[];

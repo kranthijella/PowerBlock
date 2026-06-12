@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { PlacedBlock } from "./api.ts";
+import type { PlacedBlock } from "../types/index.ts";
 import {
   A,
   B,

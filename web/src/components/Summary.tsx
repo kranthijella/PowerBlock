@@ -1,5 +1,5 @@
-import type { Summary as SummaryData } from "../api.ts";
-import { formatArea, formatMwh, formatUsd } from "../format.ts";
+import type { Summary as SummaryData } from "../types/index.ts";
+import { formatArea, formatMwh, formatUsd } from "../utils/format.ts";
 
 interface Props {
   summary: SummaryData | null;
