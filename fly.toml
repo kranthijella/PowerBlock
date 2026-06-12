@@ -1,0 +1,31 @@
+# Fly.io deployment config for PowerBlock.
+# Builds the multi-stage Dockerfile, runs the single binary on :8000, and mounts a
+# persistent volume at /data so saved sessions survive restarts and redeploys.
+app = "powerblock"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  POWERBLOCK_ADDR = ":8000"
+  POWERBLOCK_DB = "/data/powerblock.db"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  # Scale to zero when idle, cold-start on the next request (a tiny Go binary starts
+  # in milliseconds). min_machines_running = 0 keeps the demo within the free tier.
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+# Persistent volume for the SQLite database. A volume is bound to a single machine,
+# which is exactly what a single-instance SQLite app wants.
+[[mounts]]
+  source = "powerblock_data"
+  destination = "/data"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
