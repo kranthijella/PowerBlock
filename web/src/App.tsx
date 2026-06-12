@@ -10,7 +10,7 @@ import {
   type Quantities,
 } from "./api.ts";
 import { Configurator } from "./components/Configurator.tsx";
-import { SummaryPanel } from "./components/Summary.tsx";
+import { Summary } from "./components/Summary.tsx";
 import { SiteLayout } from "./components/SiteLayout.tsx";
 import { SessionBar } from "./components/SessionBar.tsx";
 
@@ -140,7 +140,7 @@ export default function App() {
         <main className="app__main">
         {/* Results + to-scale layout on the left */}
         <section className="app__panel app__panel--results">
-          <SummaryPanel summary={result?.summary ?? null} />
+          <Summary summary={result?.summary ?? null} />
           <SiteLayout layout={result?.layout ?? null} devices={devices} />
         </section>
 

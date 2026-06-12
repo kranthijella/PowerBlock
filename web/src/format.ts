@@ -18,10 +18,6 @@ export function formatMwh(n: number): string {
   return `${rounded}`;
 }
 
-export function formatFt(n: number): string {
-  return `${n.toLocaleString("en-US")} ft`;
-}
-
 export function formatArea(n: number): string {
   return `${n.toLocaleString("en-US")} ft²`;
 }

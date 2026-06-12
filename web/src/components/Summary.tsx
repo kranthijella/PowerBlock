@@ -1,12 +1,13 @@
-import type { Summary } from "../api.ts";
+import type { Summary as SummaryData } from "../api.ts";
 import { formatArea, formatMwh, formatUsd } from "../format.ts";
 
 interface Props {
-  summary: Summary | null;
+  summary: SummaryData | null;
 }
 
-// SummaryPanel is the headline read-out: cost, net energy, and land size, with the
-export function SummaryPanel({ summary }: Props) {
+// Summary is the headline read-out: cost, net energy, and land size, with battery /
+// transformer counts, area, and energy density as secondary chips below.
+export function Summary({ summary }: Props) {
   const s = summary;
   const energyClass =
     s && s.netEnergyMwh < 0 ? "stat__value stat__value--negative" : "stat__value";
