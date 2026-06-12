@@ -1,0 +1,495 @@
+
+@use "sass:color";
+
+// --- tokens ---------------------------------------------------------------
+$bg: #ffffff; // app canvas
+$panel: #ffffff; // cards
+$band: #f4f4f4; //  light section band: stat cards, chips, icon tiles, insets
+$border: #e3e3e3; // hairline borders
+$border-strong: #cccccc;
+$ink: #171a20; //
+$ink-dim: #5c5e62; //  secondary gray
+$accent: #e82127; //  red
+$accent-hot: #c81b21; // darker red for hover
+$negative: #b8860b; // muted amber for negative net energy
+
+$shadow-sm: 0 1px 2px rgba(23, 26, 32, 0.05);
+$shadow: 0 1px 2px rgba(23, 26, 32, 0.04), 0 8px 24px rgba(23, 26, 32, 0.06);
+
+$radius: 12px;
+$radius-sm: 8px;
+$pill: 100px;
+$gap: 1.25rem;
+
+// --- reset / base ---------------------------------------------------------
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+}
+
+body {
+  background: $bg;
+  color: $ink;
+  // Tesla uses Gotham; Inter / Helvetica Neue are the closest crisp fallbacks.
+  font-family: "Inter", "Helvetica Neue", Helvetica, Arial, "Segoe UI", Roboto,
+    system-ui, sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100vh;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.muted {
+  color: $ink-dim;
+}
+
+// --- app shell ------------------------------------------------------------
+.app {
+  // full-width: content fills the window so both edges sit tight like the logo
+  margin: 0;
+  padding: 0 2rem 5rem; // gap on both sides
+
+  &--error {
+    max-width: 36rem;
+    margin: 6rem auto;
+    text-align: center;
+    color: $ink-dim;
+  }
+
+  // full-width header bar: logo flush to the left edge of the viewport
+  &__header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    padding: 1.25rem 2rem 0;
+    margin-bottom: 1.5rem;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 2.1rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  &__title-accent {
+    color: $accent;
+  }
+
+  &__tagline {
+    margin: 0;
+    color: $ink-dim;
+    font-size: 0.95rem;
+  }
+
+  // results (layout) on the left, inputs on the right
+  &__main {
+    display: grid;
+    grid-template-columns: minmax(0, 1.85fr) minmax(0, 1fr);
+    gap: 3.5rem; // breathing room between the results and config panels
+    align-items: start;
+  }
+
+  &__panel {
+    background: $panel;
+    padding: 1.75rem 0; // no boundary: borderless, no shadow, blends into the canvas
+
+    &--results {
+      display: flex;
+      flex-direction: column;
+      gap: 1.85rem;
+    }
+  }
+}
+
+@media (max-width: 880px) {
+  .app__main {
+    grid-template-columns: 1fr;
+  }
+  // on mobile, put the inputs first — configure, then scroll to results
+  .app__panel--config {
+    order: -1;
+  }
+}
+
+// phones: tighten side padding, stack the summary stats, and relax the device rows
+@media (max-width: 560px) {
+  .app,
+  .app__header {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  // three big stats are too cramped side-by-side on a phone — stack them
+  .summary__grid {
+    grid-template-columns: 1fr;
+  }
+
+  // reclaim the right-edge inset and shrink the energy/qty columns for narrow widths
+  .configurator {
+    padding-right: 0;
+  }
+
+  .device-row {
+    grid-template-columns: minmax(0, 1fr) 5rem 3.75rem;
+    gap: 0.6rem;
+  }
+}
+
+.panel-title {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: $ink-dim;
+}
+
+// --- buttons (Tesla pill) -------------------------------------------------
+.btn {
+  border: 1px solid transparent;
+  border-radius: $pill;
+  padding: 0.7rem 1.6rem;
+  font-weight: 500;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s,
+    opacity 0.15s;
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  // primary (Save) = white fill, black text, black border
+  &--primary {
+    background: #fff;
+    color: $ink;
+    border-color: $ink;
+
+    &:not(:disabled):hover {
+      background: rgba(23, 26, 32, 0.05);
+    }
+  }
+
+  // secondary (Reset / Copy) = same: white fill, black text, black border
+  &--ghost {
+    background: #fff;
+    color: $ink;
+    border-color: $ink;
+
+    &:not(:disabled):hover {
+      background: rgba(23, 26, 32, 0.05);
+    }
+  }
+}
+
+// --- configurator ---------------------------------------------------------
+.configurator {
+  // nudge the right-edge items (Reset button + quantity inputs) in from the edge
+  padding-right: 2rem;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.9rem;
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.device-row {
+  display: grid;
+  // name | energy | quantity — quantity is rightmost so it lines up with the Reset button
+  grid-template-columns: minmax(0, 1fr) 6rem 4.5rem;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 2.1rem 0;
+  // no divider lines between battery packs
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  &__name {
+    font-weight: 600;
+    font-size: 0.98rem;
+  }
+
+  &__meta {
+    color: $ink-dim;
+    font-size: 0.78rem;
+  }
+
+  &__qty {
+    // fill the fixed grid column so every input is the same width and lines up
+    display: block;
+  }
+
+  &__line-energy {
+    min-width: 4.5rem;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: $ink;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+}
+
+// plain number input with native up/down arrows (type a value or click to step)
+.qty-input {
+  width: 100%;
+  height: 32px;
+  text-align: center;
+  border-radius: $radius-sm;
+  border: 1px solid $border-strong;
+  background: $panel;
+  color: $ink;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+
+  &:focus {
+    outline: none;
+    border-color: $ink;
+    box-shadow: 0 0 0 3px rgba(23, 26, 32, 0.08);
+  }
+}
+
+// --- summary --------------------------------------------------------------
+.summary {
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+  }
+
+  &__secondary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+}
+
+.stat {
+  background: transparent;
+  border: none;
+  border-radius: $radius-sm;
+  padding: 1rem 1.1rem 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  &__label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: $ink-dim;
+    font-weight: 600;
+  }
+
+  &__value {
+    font-size: 1.7rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.05;
+
+    &--negative {
+      color: $negative;
+    }
+  }
+
+  &__unit {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: $ink-dim;
+  }
+
+  // the headline cost stat carries the single accent
+  &--primary:first-child {
+    .stat__value {
+      color: $accent;
+    }
+  }
+}
+
+.chip {
+  background: #fff;
+  border: 1px solid $ink;
+  border-radius: $pill;
+  padding: 0.34rem 0.8rem;
+  font-size: 0.8rem;
+  color: $ink-dim;
+
+  strong {
+    color: $ink;
+    margin-left: 0.3rem;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// --- site layout ----------------------------------------------------------
+.site-layout {
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.9rem;
+  }
+
+  // 2D / Isometric segmented toggle
+  &__toggle {
+    display: inline-flex;
+    gap: 2px;
+    padding: 2px;
+    background: $band;
+    border-radius: $pill;
+  }
+
+  &__toggle-btn {
+    border: none;
+    background: transparent;
+    color: $ink-dim;
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 0.3rem 0.85rem;
+    border-radius: $pill;
+    transition: background 0.15s, color 0.15s;
+
+    &[aria-pressed="true"] {
+      background: #fff;
+      color: $ink;
+      box-shadow: $shadow-sm;
+    }
+
+    &[aria-pressed="false"]:hover {
+      color: $ink;
+    }
+  }
+
+  &__empty {
+    margin: 0;
+    padding: 3rem 1rem;
+    text-align: center;
+    color: $ink-dim;
+    background: $band;
+    border: 1px dashed $border-strong;
+    border-radius: $radius-sm;
+  }
+
+  &__svg {
+    width: 100%;
+    height: auto;
+    background:
+      linear-gradient(to right, rgba(23, 26, 32, 0.04) 1px, transparent 1px) 0 0 /
+      10% 100%,
+      $band;
+    border: 1px solid $border;
+    border-radius: $radius-sm;
+    display: block;
+  }
+
+  // isometric view: flat backdrop (no to-scale grid), let the boxes breathe
+  &__svg--iso {
+    background: $band;
+    padding: 0.5rem;
+  }
+
+  &__legend {
+    list-style: none;
+    margin: 0.9rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+  }
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: $ink-dim;
+
+  &__swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    // hairline so light/near-white device colours stay visible on the white page
+    box-shadow: inset 0 0 0 1px rgba(23, 26, 32, 0.18);
+  }
+}
+
+// --- session bar ----------------------------------------------------------
+.session-bar {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__saved {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: $ink-dim;
+    font-weight: 600;
+  }
+
+  &__code {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: $accent;
+    background: rgba($accent, 0.07);
+    border: 1px solid rgba($accent, 0.22);
+    border-radius: 7px;
+    padding: 0.2rem 0.55rem;
+  }
+
+  &__hint {
+    margin: 0.65rem 0 0;
+    font-size: 0.82rem;
+  }
+
+  &__error {
+    margin: 0.65rem 0 0;
+    font-size: 0.82rem;
+    color: $accent-hot;
+  }
+}
