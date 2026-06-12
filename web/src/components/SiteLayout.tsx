@@ -13,27 +13,16 @@ type View = "2d" | "iso";
 
 const MAX_WIDTH_FT = 100; // matches layout.MaxWidthFT in the backend
 
-
-// Render guard: past this many blocks the per-block surface markings (bay seams,
-// fins, dots) collapse to sub-pixel noise, so we skip them and draw plain blocks.
-// This keeps the layout smooth near the input ceiling (4 types × 1000 ≈ 6k blocks)
-// while still showing every unit to scale.
+// above this block count the per-block markings are sub-pixel, so skip them
 const DETAIL_BLOCK_LIMIT = 400;
 
-
-// Memoized: the layout holds up to a few thousand blocks, and its props (layout,
-// devices) don't change while the user is typing in the configurator — only after the
-// debounced recalculation returns. Without this, every keystroke re-rendered and
-// rebuilt the whole SVG block list with identical data.
+// memo: layout/devices only change on a new calc, not on every keystroke
 export const SiteLayout = memo(function SiteLayout({ layout, devices }: Props) {
-  // Default to 2D so the original to-scale view stays the landing state.
   const [view, setView] = useState<View>("2d");
   const hasBlocks = layout && layout.blocks.length > 0;
   const depth = hasBlocks ? layout.depthFt : 10;
   const showDetail = hasBlocks && layout.blocks.length <= DETAIL_BLOCK_LIMIT;
 
-  // Which device types are actually placed, for the legend (in catalog order). Memoized
-  // so the O(n) Set build over the blocks doesn't run on unrelated re-renders.
   const legend = useMemo(() => {
     const present = new Set(layout?.blocks.map((b) => b.deviceName) ?? []);
     return devices.filter((d) => present.has(d.name));
@@ -86,12 +75,11 @@ export const SiteLayout = memo(function SiteLayout({ layout, devices }: Props) {
         >
           {layout.blocks.map((b, i) => {
             const style = deviceStyle(b.deviceName);
-            // device surface detail, mapped from fractional (u,v) onto the inset rect
+            // inset the rect slightly so adjacent blocks read as separate
             const ix = b.x + 0.4;
             const iy = b.y + 0.4;
             const iw = b.w - 0.8;
             const ih = b.h - 0.8;
-            // skip the per-block markings entirely once the site is dense (guard)
             const detail = showDetail ? deviceDetail(b.deviceName, b.w) : null;
             return (
               <g key={i}>

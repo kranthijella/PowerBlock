@@ -11,6 +11,8 @@ const (
 	Transformer = "Transformer"
 )
 
+// Device is a catalog entry: footprint, energy (negative for the transformer), cost,
+// release year, and whether it is a user-selectable battery.
 type Device struct {
 	Name        string  `json:"name"`
 	WidthFT     int     `json:"widthFt"`

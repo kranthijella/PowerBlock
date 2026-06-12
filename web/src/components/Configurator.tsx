@@ -9,8 +9,7 @@ interface Props {
   maxQty: number;
 }
 
-// Configurator is the left panel: one row per selectable battery. Transformers are
-// never shown here — they are auto-derived by the backend from the battery count.
+// one row per battery; transformers aren't shown (the backend derives them)
 export function Configurator({ batteries, quantities, onChange, onReset, maxQty }: Props) {
   return (
     <div className="configurator">

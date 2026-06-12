@@ -31,6 +31,8 @@ type SQLiteStore struct {
 // compile-time check that SQLiteStore satisfies Store.
 var _ Store = (*SQLiteStore)(nil)
 
+// Open opens the SQLite database at path, applies the schema, and returns a ready
+// store. It caps the pool at one connection to serialize writes.
 func Open(path string) (*SQLiteStore, error) {
 	db, err := sql.Open("sqlite", path)
 	if err != nil {

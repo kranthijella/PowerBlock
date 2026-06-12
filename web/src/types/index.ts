@@ -1,5 +1,5 @@
-// Domain / API types, shared by the services layer and the components. These mirror
-// the JSON the Go backend returns; they are the single shape both sides agree on.
+// Domain types mirroring the JSON the Go backend returns, shared by the services
+// layer and the components.
 
 export interface Device {
   name: string;

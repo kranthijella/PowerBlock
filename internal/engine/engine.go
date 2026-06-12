@@ -5,8 +5,11 @@ import (
 	"PowerBlock/internal/layout"
 )
 
+// TransformerRatio is the number of batteries per required transformer.
 const TransformerRatio = 2
 
+// Totals is the tally for a configuration: battery and derived transformer counts,
+// total cost, and net energy.
 type Totals struct {
 	BatteryCount     int     `json:"batteryCount"`
 	TransformerCount int     `json:"transformerCount"`
@@ -14,6 +17,7 @@ type Totals struct {
 	NetEnergyMWh     float64 `json:"netEnergyMwh"`
 }
 
+// TransformersFor returns ceil(batteryCount / TransformerRatio), or 0 for no batteries.
 func TransformersFor(batteryCount int) int {
 	if batteryCount <= 0 {
 		return 0
@@ -21,6 +25,8 @@ func TransformersFor(batteryCount int) int {
 	return (batteryCount + TransformerRatio - 1) / TransformerRatio
 }
 
+// Compute returns the totals for the given battery quantities, including the
+// transformers it derives. Non-battery and non-positive entries are ignored.
 func Compute(quantities map[string]int) Totals {
 	var t Totals
 	for name, qty := range quantities {
@@ -43,6 +49,7 @@ func Compute(quantities map[string]int) Totals {
 	return t
 }
 
+// Summary is the Totals plus the packed land footprint and net-energy density.
 type Summary struct {
 	Totals
 	LandWidthFT             int     `json:"landWidthFt"`
@@ -51,6 +58,8 @@ type Summary struct {
 	EnergyDensityMWhPerSqFt float64 `json:"energyDensityMwhPerSqFt"`
 }
 
+// Summarize computes the totals for quantities and packs the devices into a layout,
+// returning both. Energy density is zero when nothing is placed.
 func Summarize(quantities map[string]int) (Summary, layout.Layout) {
 	totals := Compute(quantities)
 	lay := layout.Pack(deviceCounts(quantities, totals.TransformerCount))

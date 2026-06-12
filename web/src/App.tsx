@@ -25,24 +25,19 @@ export default function App() {
   const [result, setResult] = useState<CalculateResult | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [calcError, setCalcError] = useState<string | null>(null);
-  // Non-fatal notice when a share code from the URL can't be resumed (e.g. expired or
-  // mistyped). The app still loads normally with an empty configuration.
+  // shown when a URL share code can't be resumed; the app still loads empty
   const [sessionNotice, setSessionNotice] = useState<string | null>(null);
 
-  // Saved-session tracking: the share code and a snapshot of the quantities at save
-  // time, so we can tell the user when their current edits are unsaved.
   const [savedCode, setSavedCode] = useState<string | null>(null);
   const [savedSnapshot, setSavedSnapshot] = useState<string>("");
   const [saving, setSaving] = useState(false);
 
   const batteries = useMemo(() => devices.filter((d) => d.isBattery), [devices]);
 
-  // On mount: load the catalog and, if the URL carries a code, the saved session.
   useEffect(() => {
     const ctrl = new AbortController();
     (async () => {
-      // The catalog is required. If it fails the backend is unreachable, which is the
-      // one case that warrants the full-page error.
+      // catalog is required; failing it means the backend is down
       let devices: Device[];
       try {
         const cat = await fetchCatalog(ctrl.signal);
@@ -54,8 +49,7 @@ export default function App() {
       }
       setDevices(devices);
 
-      // A saved session is optional. A bad or expired share code should leave the app
-      // fully usable, so surface a dismissible notice instead of crashing the page.
+      // a bad share code shouldn't break the app, just notify and carry on
       const code = readShareCode();
       if (!code) return;
       try {
@@ -71,16 +65,15 @@ export default function App() {
             ? `No saved configuration found for code “${code}”. Starting fresh.`
             : "Couldn’t load that saved configuration. Starting fresh.",
         );
-        // Drop the bad code from the URL so a refresh starts clean.
+        // drop the bad code so a refresh starts clean
         window.history.replaceState(null, "", window.location.pathname);
       }
     })();
     return () => ctrl.abort();
   }, []);
 
-  // Recompute totals + layout whenever quantities change, debounced so each keystroke
-  // on a stepper doesn't fire a request. A fresh AbortController cancels any in-flight
-  // calculation so a slow response can't overwrite a newer one.
+  // debounced recompute; the AbortController drops a stale response if the user
+  // changes quantities again before it lands
   useEffect(() => {
     const ctrl = new AbortController();
     const t = setTimeout(() => {
@@ -123,7 +116,6 @@ export default function App() {
     }
   }, [quantities]);
 
-  // Has the user edited since the last save? Used to nudge them to re-save.
   const dirty = savedCode !== null && JSON.stringify(quantities) !== savedSnapshot;
   const totalUnits = useMemo(
     () => Object.values(quantities).reduce((a, b) => a + (b > 0 ? b : 0), 0),
@@ -145,7 +137,6 @@ export default function App() {
 
   return (
     <>
-      {/* full-width header: logo flush to the left edge of the viewport */}
       <header className="app__header">
         <h1 className="app__title">
           Power<span className="app__title-accent">Block</span>
@@ -155,13 +146,11 @@ export default function App() {
 
       <div className="app">
         <main className="app__main">
-        {/* Results + to-scale layout on the left */}
         <section className="app__panel app__panel--results">
           <Summary summary={result?.summary ?? null} />
           <SiteLayout layout={result?.layout ?? null} devices={devices} />
         </section>
 
-        {/* Inputs + save/resume on the right */}
         <section className="app__panel app__panel--config">
           {sessionNotice && (
             <div className="notice" role="status">

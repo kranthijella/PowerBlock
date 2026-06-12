@@ -27,10 +27,9 @@ export function SessionBar({ onSave, saving, savedCode, shareUrl, dirty, canSave
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      // briefly show "Copied!", then hide the share code + link until the next save
-      setTimeout(() => setRevealed(false), 1200);
+      setTimeout(() => setRevealed(false), 1200); // hide again after a moment
     } catch {
-      // clipboard blocked (e.g. insecure context) — the code is still visible to copy
+      // clipboard blocked (insecure context); code stays visible to copy by hand
     }
   };
 

@@ -24,6 +24,9 @@ type Layout struct {
 	AreaSqFt int           `json:"areaSqFt"`
 }
 
+// Pack shelf-packs the device counts into 10 ft rows, widest first, wrapping to a new
+// row when the next block would exceed MaxWidthFT. It returns the placed blocks and the
+// bounding-box land size.
 func Pack(counts map[string]int) Layout {
 	blocks := []PlacedBlock{}
 	var rowUsed []int

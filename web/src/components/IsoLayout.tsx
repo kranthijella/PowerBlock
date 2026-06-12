@@ -7,16 +7,11 @@ interface Props {
   layout: Layout;
 }
 
-// Render guard: the iso boxes carry far more geometry than the 2D blocks (panels,
-// louvers, handles, bushings), so full decor is dropped at a lower count than the
-// 2D view. Past this, units render as plain extruded boxes with just bay seams.
+// iso boxes are heavier than 2d blocks, so drop the decor at a lower count
 const ISO_DETAIL_LIMIT = 150;
-
 
 export function IsoLayout({ layout }: Props) {
   const faces = useMemo(() => {
-    // full detail (vents/doors/handles, fins/bushings) only while the site is sparse
-    // enough for it to read; otherwise plain boxes to keep the SVG light.
     const full = layout.blocks.length <= ISO_DETAIL_LIMIT;
     return sortBackToFront(layout.blocks).map((u) => unitFaces(u, full));
   }, [layout.blocks]);

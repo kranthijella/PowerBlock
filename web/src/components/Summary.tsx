@@ -5,8 +5,6 @@ interface Props {
   summary: SummaryData | null;
 }
 
-// Summary is the headline read-out: cost, net energy, and land size, with battery /
-// transformer counts, area, and energy density as secondary chips below.
 export function Summary({ summary }: Props) {
   const s = summary;
   const energyClass =

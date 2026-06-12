@@ -1,11 +1,7 @@
 import { memo } from "react";
 import type { Point, UnitFaces } from "../utils/iso.ts";
 
-// IsoBox draws a single unit as an extruded box: three SVG polygons (left and
-// right side faces, then the top face on top) plus the device's surface markings
-// on the top face. Memoized so a box only re-renders when its projected faces
-// actually change — the projection itself is memoized one level up in IsoLayout.
-
+// one unit as an extruded box: left/right side faces, top, then surface markings
 function points(pts: Point[]): string {
   return pts.map((p) => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(" ");
 }
@@ -44,7 +40,6 @@ export const IsoBox = memo(function IsoBox({ faces }: Props) {
         </title>
       </polygon>
 
-      {/* recessed vent / door panels on the front face */}
       {decor.panels.map((p, i) => (
         <polygon
           key={`p${i}`}
@@ -56,7 +51,6 @@ export const IsoBox = memo(function IsoBox({ faces }: Props) {
         />
       ))}
 
-      {/* seams, louvers, handles, radiator fins, bushing posts */}
       {decor.lines.map((l, i) => (
         <line
           key={`l${i}`}
@@ -70,7 +64,6 @@ export const IsoBox = memo(function IsoBox({ faces }: Props) {
         />
       ))}
 
-      {/* bushing insulator discs */}
       {decor.discs.map((d, i) => (
         <ellipse
           key={`d${i}`}
